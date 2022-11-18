@@ -35,22 +35,32 @@ func (rt *globalrt) update(t testing.TB, exp Expectation, actual string) {
 type filert struct {
 	exp      Expectation
 	original string
-	patch    patch
+	patches  patches
 }
 
 func newfilert(t testing.TB, exp Expectation) *filert {
 	content, err := os.ReadFile(exp.file)
 	require.NoError(t, err)
-	return &filert{exp, string(content), patch{}}
+	return &filert{exp, string(content), newPatches(content)}
 }
 
 func (rt *filert) update(t testing.TB, actual string) {
-	locate(t, rt.original, rt.exp.line)
+	loc := locate(t, rt.original, rt.exp.line)
+	rt.patches.apply(patch{loc, actual})
+	require.NoError(t, os.WriteFile(rt.exp.file, rt.patches.text, 0))
 }
 
 type location struct {
 	start int
 	end   int
+}
+
+func (loc location) len() int {
+	return loc.end - loc.start
+}
+
+func (loc location) shifted(k int) location {
+	return location{loc.start + k, loc.end + k}
 }
 
 type once[T any] struct {
