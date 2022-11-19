@@ -24,7 +24,6 @@ func TestLocate(t *testing.T) {
 	check(t, 13, `some
 multiline
 string`)
-
 }
 
 func TestPatch(t *testing.T) {

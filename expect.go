@@ -22,7 +22,7 @@ func should_update_expect() bool {
 	return ok
 }
 
-func (exp Expectation) Expect(t testing.TB, actual string) {
+func (exp Expectation) AssertEqual(t testing.TB, actual string) {
 	if exp.expected == actual {
 		return
 	}
