@@ -14,7 +14,7 @@ type Expectation struct {
 	expected string
 }
 
-const env = "UPDATE_EXPECT"
+const env = "UPDATE_SNAPSHOTS"
 
 func should_update_expect() bool {
 	_, ok := os.LookupEnv(env)
