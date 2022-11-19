@@ -15,11 +15,17 @@ func TestExpect(t *testing.T) {
 }
 
 func TestMultipleMultilineUpdates(t *testing.T) {
-	Expect(``).AssertEqual(t, `foo
+	// actually "running" this test is a bit awkward
+	// I just replace the expectation with an empty string and update expects to check it works
+	Expect(`foo
+bar
+baz`).AssertEqual(t, `foo
 bar
 baz`)
 
-	Expect(``).AssertEqual(t, `foo
-bar
-baz`)
+	Expect(`a
+b
+c`).AssertEqual(t, `a
+b
+c`)
 }

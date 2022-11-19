@@ -26,28 +26,27 @@ func (rt *globalrt) update(t testing.TB, exp Expectation, actual string) {
 	defer rt.Unlock()
 	ft, ok := rt.filerts[exp.file]
 	if !ok {
-		ft = newfilert(t, exp)
+		ft = newfilert(t, exp.file)
 		rt.filerts[exp.file] = ft
 	}
-	ft.update(t, actual)
+	ft.update(t, exp, actual)
 }
 
 type filert struct {
-	exp      Expectation
 	original string
 	patches  patches
 }
 
-func newfilert(t testing.TB, exp Expectation) *filert {
-	content, err := os.ReadFile(exp.file)
+func newfilert(t testing.TB, file string) *filert {
+	content, err := os.ReadFile(file)
 	require.NoError(t, err)
-	return &filert{exp, string(content), newPatches(content)}
+	return &filert{string(content), newPatches(content)}
 }
 
-func (rt *filert) update(t testing.TB, actual string) {
-	loc := locate(t, rt.original, rt.exp.line)
+func (rt *filert) update(t testing.TB, exp Expectation, actual string) {
+	loc := locate(t, rt.original, exp.line)
 	rt.patches.apply(patch{loc, actual})
-	require.NoError(t, os.WriteFile(rt.exp.file, rt.patches.text, 0))
+	require.NoError(t, os.WriteFile(exp.file, rt.patches.text, 0))
 }
 
 type location struct {
