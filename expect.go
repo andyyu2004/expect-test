@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 type Expectation struct {
@@ -36,18 +36,14 @@ func (exp Expectation) AssertEqual(t testing.TB, actual any) {
 	}
 
 	if !should_update_expect() {
-		require.Equal(t, exp.expected, actual)
+		assert.Equal(t, exp.expected, actual)
 	}
 
 	exp.update(t, formatted)
 }
 
 func (exp Expectation) update(t testing.TB, actual string) {
-	file, err := os.Open(exp.file)
-	require.NoError(t, err)
-	defer file.Close()
-	rt := getrt()
-	rt.update(t, exp, actual)
+	getrt().update(t, exp, actual)
 
 }
 
