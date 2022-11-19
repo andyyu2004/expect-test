@@ -20,9 +20,11 @@ func TestLocate(t *testing.T) {
 
 	check(t, 10, `foo`)
 	check(t, 11, ``)
-	check(t, 12, `some
+	check(t, 12, "double quoted string that can have ` in it")
+	check(t, 13, `some
 multiline
 string`)
+
 }
 
 func TestPatch(t *testing.T) {

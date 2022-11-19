@@ -71,9 +71,14 @@ func locate(t testing.TB, text string, line int) location {
 	require.True(t, scanner.Scan())
 
 	startColumn := 0
+	delimiter := '`'
 	for i, char := range scanner.Bytes() {
 		if char == '`' {
 			startColumn = i + 1
+			break
+		} else if char == '"' {
+			startColumn = i + 1
+			delimiter = '"'
 			break
 		}
 	}
@@ -85,7 +90,7 @@ func locate(t testing.TB, text string, line int) location {
 	start += startColumn
 
 	for j, char := range text[start:] {
-		if char == '`' {
+		if char == delimiter {
 			return location{start, start + j}
 		}
 	}
