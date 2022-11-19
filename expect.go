@@ -22,8 +22,16 @@ func should_update_expect() bool {
 	return ok
 }
 
-func (exp Expectation) AssertEqual(t testing.TB, actual string) {
-	if exp.expected == actual {
+func (exp Expectation) AssertEqual(t testing.TB, actual any) {
+	var formatted string
+	switch actual := actual.(type) {
+	case string:
+		formatted = actual
+	default:
+		formatted = pretty.Sprintf("%# v", actual)
+	}
+
+	if exp.expected == formatted {
 		return
 	}
 
@@ -31,7 +39,7 @@ func (exp Expectation) AssertEqual(t testing.TB, actual string) {
 		require.Equal(t, exp.expected, actual)
 	}
 
-	exp.update(t, actual)
+	exp.update(t, formatted)
 }
 
 func (exp Expectation) update(t testing.TB, actual string) {
@@ -43,18 +51,11 @@ func (exp Expectation) update(t testing.TB, actual string) {
 
 }
 
-func Expect(expected any) Expectation {
+func Expect(expected string) Expectation {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {
 		panic("failed to get caller for `expect.Expect`")
 	}
 
-	var formatted string
-	switch expected := expected.(type) {
-	case string:
-		formatted = expected
-	default:
-		formatted = pretty.Sprintf("%# v", expected)
-	}
-	return Expectation{file, line, formatted}
+	return Expectation{file, line, expected}
 }
