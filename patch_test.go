@@ -45,6 +45,15 @@ bar`, string(p.text))
 		require.Equal(t, `foo2
 bar2`, string(p.text))
 	})
+
+	t.Run("multiline", func(t *testing.T) {
+		p := newPatches([]byte(``))
+
+		p.apply(patch{location{0, 0}, `foo
+bar`})
+		require.Equal(t, `foo
+bar`, string(p.text))
+	})
 }
 
 func TestReplace(t *testing.T) {

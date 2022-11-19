@@ -37,6 +37,7 @@ func (exp Expectation) AssertEqual(t testing.TB, actual any) {
 
 	if !should_update_expect() {
 		assert.Equal(t, exp.expected, actual)
+		return
 	}
 
 	exp.update(t, formatted)

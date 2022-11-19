@@ -13,3 +13,13 @@ func TestExpect(t *testing.T) {
 	Expect(`bar`).AssertEqual(t, `bar`)
 	Expect(`bar`).AssertEqual(t, `bar`)
 }
+
+func TestMultipleMultilineUpdates(t *testing.T) {
+	Expect(``).AssertEqual(t, `foo
+bar
+baz`)
+
+	Expect(``).AssertEqual(t, `foo
+bar
+baz`)
+}
