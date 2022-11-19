@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/kr/pretty"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,10 +43,18 @@ func (exp Expectation) update(t testing.TB, actual string) {
 
 }
 
-func Expect(expected string) Expectation {
+func Expect(expected any) Expectation {
 	_, file, line, ok := runtime.Caller(1)
 	if !ok {
 		panic("failed to get caller for `expect.Expect`")
 	}
-	return Expectation{file, line, expected}
+
+	var formatted string
+	switch expected := expected.(type) {
+	case string:
+		formatted = expected
+	default:
+		formatted = pretty.Sprintf("%# v", expected)
+	}
+	return Expectation{file, line, formatted}
 }
