@@ -23,6 +23,7 @@ func should_update_expect() bool {
 }
 
 func (exp Expectation) AssertEqual(t testing.TB, actual any) {
+	t.Helper()
 	var formatted string
 	switch actual := actual.(type) {
 	case string:
