@@ -90,7 +90,7 @@ func locate(t testing.TB, text string, line int) (location, rune) {
 	start += startColumn
 
 	for j, char := range text[start:] {
-		if char == delimiter {
+		if char == delimiter && (delimiter != '"' || text[start+j-1] != '\\') {
 			return location{start, start + j}, delimiter
 		}
 	}
