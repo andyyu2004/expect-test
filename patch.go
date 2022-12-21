@@ -59,7 +59,7 @@ func replace(bytes []byte, loc location, with string) []byte {
 	}
 }
 
-func locate(t testing.TB, text string, line int) location {
+func locate(t testing.TB, text string, line int) (location, rune) {
 	scanner := bufio.NewScanner(strings.NewReader(text))
 	start := 0
 	for i := 1; i < line; i++ {
@@ -91,10 +91,10 @@ func locate(t testing.TB, text string, line int) location {
 
 	for j, char := range text[start:] {
 		if char == delimiter {
-			return location{start, start + j}
+			return location{start, start + j}, delimiter
 		}
 	}
 
 	require.FailNow(t, "no end marker found")
-	return location{}
+	return location{}, delimiter
 }

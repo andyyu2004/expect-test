@@ -12,18 +12,19 @@ import (
 var example string
 
 func TestLocate(t *testing.T) {
-	check := func(t *testing.T, line int, expected string) {
+	check := func(t *testing.T, line int, expected string, expectedDelimeter rune) {
 		t.Helper()
-		location := locate(t, example, line)
+		location, delimeter := locate(t, example, line)
+		require.Equal(t, expectedDelimeter, delimeter)
 		require.Equal(t, expected, example[location.start:location.end])
 	}
 
-	check(t, 10, `foo`)
-	check(t, 11, ``)
-	check(t, 12, "double quoted string that can have ` in it")
+	check(t, 10, `foo`, '`')
+	check(t, 11, ``, '`')
+	check(t, 12, "double quoted string that can have ` in it", '"')
 	check(t, 13, `some
 multiline
-string`)
+string`, '`')
 }
 
 func TestPatch(t *testing.T) {

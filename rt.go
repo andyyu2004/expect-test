@@ -2,6 +2,7 @@ package expect
 
 import (
 	"os"
+	"strconv"
 	"sync"
 	"testing"
 
@@ -44,7 +45,12 @@ func newfilert(t testing.TB, file string) *filert {
 }
 
 func (rt *filert) update(t testing.TB, exp Expectation, actual string) {
-	loc := locate(t, rt.original, exp.line)
+	loc, delim := locate(t, rt.original, exp.line)
+	if delim == '"' {
+		actual = strconv.Quote(actual)
+		// slice off the extraneous quotes
+		actual = actual[1 : len(actual)-1]
+	}
 	rt.patches.apply(patch{loc, actual})
 	require.NoError(t, os.WriteFile(exp.file, rt.patches.text, 0))
 }
