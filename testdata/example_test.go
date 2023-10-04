@@ -15,4 +15,11 @@ func TestExample(t *testing.T) {
 	expect.Expect(t, `some
 multiline
 string`)
+
+	check := func(input string, expectation expect.Expectation) {
+		expectation.AssertEqual(t, input)
+	}
+
+	check(`test that the locate still works when there 
+is an unrelated backtick on the same line`, expect.Expect(t, `expected`))
 }
