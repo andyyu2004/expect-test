@@ -27,6 +27,7 @@ func TestLocate(t *testing.T) {
 	check(t, 15, `some
 multiline
 string`, '`')
+	check(t, 24, `expected`, '`')
 }
 
 func TestPatch(t *testing.T) {

@@ -2,11 +2,14 @@ package expect
 
 import (
 	"bufio"
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"slices"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/slices"
 )
 
 type patches struct {
@@ -16,8 +19,8 @@ type patches struct {
 
 func (c *patches) apply(p patch) {
 	c.patches = append(c.patches, p)
-	slices.SortFunc(c.patches, func(i, j patch) bool {
-		return i.loc.start < j.loc.start
+	slices.SortFunc(c.patches, func(i, j patch) int {
+		return i.loc.start - j.loc.start
 	})
 
 	// need to shift the location of patch accordingly due to the previous patches
@@ -70,31 +73,37 @@ func locate(t testing.TB, text string, line int) (location, rune) {
 
 	require.True(t, scanner.Scan())
 
-	startColumn := 0
-	delimiter := '`'
-	for i, char := range scanner.Bytes() {
-		if char == '`' {
-			startColumn = i + 1
-			break
-		} else if char == '"' {
-			startColumn = i + 1
-			delimiter = '"'
-			break
+	col := strings.Index(scanner.Text(), "Expect")
+	if col == -1 {
+		panic("no `Expect` call found on expected line")
+	}
+
+	// we're looking for the start of the string literal
+	// this slice will be of the pattern `Expect(t, <what we want>) ... the rest of the code`
+	sliceToParse := text[start+col:]
+	endIdx := 0
+	var expr ast.Expr
+	for expr == nil {
+		idx := strings.Index(sliceToParse[endIdx:], ")")
+		if idx == -1 {
+			panic("no closing paren found, this code must be syntactically correct otherwise this wouldn't be running")
 		}
+		endIdx += idx + 1
+
+		expr, _ = parser.ParseExpr(sliceToParse[:endIdx])
 	}
 
-	if startColumn == 0 {
-		require.FailNow(t, "no start marker found")
+	call := expr.(*ast.CallExpr)
+	if len(call.Args) != 2 {
+		panic(fmt.Sprintf("expected 2 args to Expect, got %d", len(call.Args)))
 	}
 
-	start += startColumn
+	expectedLit := call.Args[1].(*ast.BasicLit)
 
-	for j, char := range text[start:] {
-		if char == delimiter && (delimiter != '"' || text[start+j-1] != '\\') {
-			return location{start, start + j}, delimiter
-		}
-	}
+	end := start + col + endIdx - 2
 
-	require.FailNow(t, "no end marker found")
-	return location{}, delimiter
+	return location{
+		start: end - len(expectedLit.Value) + 2,
+		end:   end,
+	}, rune(expectedLit.Value[0])
 }
