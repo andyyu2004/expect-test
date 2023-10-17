@@ -83,14 +83,18 @@ func locate(t testing.TB, text string, line int) (location, rune) {
 	sliceToParse := text[startIdx+col:]
 	endIdx := 0
 	var expr ast.Expr
-	for expr == nil {
+	for {
 		idx := strings.Index(sliceToParse[endIdx:], ")")
 		if idx == -1 {
 			panic("no closing paren found, this code must be syntactically correct otherwise this wouldn't be running")
 		}
 		endIdx += idx + 1
 
-		expr, _ = parser.ParseExpr(sliceToParse[:endIdx])
+		var err error
+		expr, err = parser.ParseExpr(sliceToParse[:endIdx])
+		if err == nil {
+			break
+		}
 	}
 
 	call := expr.(*ast.CallExpr)
