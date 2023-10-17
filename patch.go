@@ -64,11 +64,11 @@ func replace(bytes []byte, loc location, with string) []byte {
 
 func locate(t testing.TB, text string, line int) (location, rune) {
 	scanner := bufio.NewScanner(strings.NewReader(text))
-	start := 0
+	startIdx := 0
 	for i := 1; i < line; i++ {
 		require.True(t, scanner.Scan())
 		// + 1 for the newline (sorry windows)
-		start += 1 + len(scanner.Text())
+		startIdx += 1 + len(scanner.Text())
 	}
 
 	require.True(t, scanner.Scan())
@@ -80,7 +80,7 @@ func locate(t testing.TB, text string, line int) (location, rune) {
 
 	// we're looking for the start of the string literal
 	// this slice will be of the pattern `Expect(t, <what we want>) ... the rest of the code`
-	sliceToParse := text[start+col:]
+	sliceToParse := text[startIdx+col:]
 	endIdx := 0
 	var expr ast.Expr
 	for expr == nil {
@@ -100,10 +100,12 @@ func locate(t testing.TB, text string, line int) (location, rune) {
 
 	expectedLit := call.Args[0].(*ast.BasicLit)
 
-	end := start + col + endIdx - 2
+	end := startIdx + col + endIdx - 2
+	start := end - len(expectedLit.Value) + 2
+	delimiter := expectedLit.Value[0]
+	if text[start-1] != delimiter || text[end] != delimiter || text[start:end] != expectedLit.Value[1:len(expectedLit.Value)-1] {
+		panic("expected to find string literal")
+	}
 
-	return location{
-		start: end - len(expectedLit.Value) + 2,
-		end:   end,
-	}, rune(expectedLit.Value[0])
+	return location{start, end}, rune(delimiter)
 }
