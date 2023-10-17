@@ -90,7 +90,11 @@ func locate(t testing.TB, text string, line int) (location, rune) {
 		}
 		endIdx += idx + 1
 
-		expr, _ = parser.ParseExpr(sliceToParse[:endIdx])
+		var err error
+		expr, err = parser.ParseExpr(sliceToParse[:endIdx])
+		if err == nil {
+			break
+		}
 	}
 
 	call := expr.(*ast.CallExpr)

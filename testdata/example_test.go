@@ -20,6 +20,7 @@ string`)
 		expectation.AssertEqual(t, input)
 	}
 
-	check(`test that the locate still works when there 
+	check(`test that the locate still works when there
 is an unrelated backtick on the same line`, expect.Expect(`expected`))
+	check("input has closing paren ) in it", expect.Expect("expected2"))
 }
