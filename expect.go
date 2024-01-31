@@ -15,11 +15,14 @@ type Expectation struct {
 	expected string
 }
 
-const env = "UPDATE_SNAPSHOTS"
-
 func should_update_expect() bool {
-	_, ok := os.LookupEnv(env)
-	return ok
+	for _, env := range []string{"UPDATE_SNAPS", "UPDATE_SNAPSHOTS", "UPDATE_EXPECT"} {
+		if _, ok := os.LookupEnv(env); ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (exp Expectation) AssertEqual(t testing.TB, actual any) {
@@ -46,7 +49,6 @@ func (exp Expectation) AssertEqual(t testing.TB, actual any) {
 
 func (exp Expectation) update(t testing.TB, actual string) {
 	getrt().update(t, exp, actual)
-
 }
 
 func Expect(expected string) Expectation {
