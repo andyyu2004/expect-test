@@ -1,6 +1,7 @@
 package expect
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"testing"
@@ -31,6 +32,12 @@ func (exp Expectation) AssertEqual(t testing.TB, actual any) {
 	switch actual := actual.(type) {
 	case string:
 		formatted = actual
+	case fmt.Stringer:
+		formatted = actual.String()
+	case fmt.GoStringer:
+		formatted = actual.GoString()
+	case error:
+		formatted = actual.Error()
 	default:
 		formatted = pretty.Sprintf("%# v", actual)
 	}
